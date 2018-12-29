@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>区域编辑 v2</title>
+    <link rel="stylesheet" href="./vt.css">
+    <style>
+
+        .area{
+            position:fixed;
+            background:rgba(0,0,0,0.3);
+            width:40%;
+            height: 60%;
+
+            display:none;
+        }
+        .areaEdit{
+            position:fixed;
+            background:rgba(0,0,0,0.3);
+            width:40%;
+            height: 60%;
+            margin-left:42%;
+            font-size: 16px;
+            color:#ffffff;
+        }
+
+    </style>
+</head>
+<body >
+<div style="position: fixed;right:12px;bottom:12px">
+    <button id="mode3D">3D模式</button>
+    <button id="modePano">全景模式</button>
+    <button id="areaEdit">区域文字颜色编辑</button>
+    <button id="v3area_open">开启3d分区模式</button>
+    <button id="v3area_close">关闭3d分区模式</button>
+</div>
+<div id="area" class="area"></div>
+
+<div id="newArea" class="areaEdit" style="display: none">
+    <button id="newArea_sava">保存</button><br>
+    请输入新区域文字:<input id="newArea_font">
+    <br> 请输入新区域颜色:<input id="newArea_color">
+</div>
+
+
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_5I5J/changsha/2018-06-17/jinxing/ca17a758e612c1cb39c0da8a1f885f95'});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+      // 切换3d模式
+      VT.mode3D();
+    });
+    document.getElementById('modePano').addEventListener('click', function () {
+      // 切换全景模式
+      VT.modePano();
+    });
+
+
+    // 区域编辑 二维
+    document.getElementById('areaEdit').addEventListener('click',function(){
+        VT.areaEdit({});
+    });
+    // 开启3d分区模式
+    document.getElementById('v3area_open').addEventListener('click',function(){
+        VT.initArea();
+
+    });
+    // 关闭3d分区模式
+    document.getElementById('v3area_close').addEventListener('click',function(){
+        VT.closeArea();
+    });
+
+
+    console.log(VT.getAreaEditObj() )
+    /**
+     * 保存与初始化
+     *
+     * VT.getAreaEditObj()      返回字符串    用于保存
+     * VT.setAreaEditObj(jsonObj)     jsonObj   为保存的字符串   用于初始化
+     *
+     */
+
+
+</script>
+
+
+</body>
+</html>

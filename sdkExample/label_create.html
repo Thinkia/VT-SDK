@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <!--视口设置：不可缩放，初始缩放为1.0， viewport-fit 为 iphone X 全面屏适配属性-->
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,viewport-fit=cover">
+  <!--避免ie使用兼容模式-->
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <!--禁止iphone自动识别手机号码-->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="format-detection" content="email=no">
+  <!--360使用极速模式-->
+  <meta name="renderer" content="webkit">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <!--防止链接点击后导致当前界面重定向，影响模型显示。-->
+  <base target="_blank">
+  <title>创建标签</title>
+  <link rel="stylesheet" href="./vt.css">
+  <style>
+    /*底部菜单*/
+    #bottomMenu {
+      position: fixed;
+      right: 12px;
+      bottom: 12px;;
+    }
+
+    /*表单样式*/
+    #labelForm {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 0;
+      font-size: 16px;
+      padding: 16px;
+      line-height: 36px;
+      background: white;
+    }
+
+    /*图标样式*/
+    #labelForm img {
+      background: black;
+      width: 36px;
+    }
+
+    /*提示文字*/
+    .tips{
+      position:fixed;
+      left:50%;
+      transform:translate(-50%);
+      top:32px;
+      font-size: 26px;
+      background: white;
+    }
+  </style>
+</head>
+<body>
+
+<div class="tips">右键点击模型任意位置即可开始创建标签</div>
+
+<!--三维渲染容器-->
+<div id="app"></div>
+
+<!--标签表单-->
+<div id="labelForm">
+  <h3>标签属性</h3>
+  <label for="title">标题：</label><input id="title" type="text"><br>
+  <label for="content">内容：</label><input id="content" type="text"><br>
+  <label for="resUrl">资源路径：</label><input id="resUrl" type="text"><br>
+  <label for="linkUrl">跳转链接：</label><input id="linkUrl" type="text"><br>
+
+  标签类型：
+  <input id="imgLabel" type="radio" name="labelType" onchange="selectLabelType(0)" checked><label for="imgLabel">图标类型</label>
+  <input id="textLabel" type="radio" name="labelType" onchange="selectLabelType(1)"><label for="textLabel">文字类型</label><br>
+  图片：
+  <input id="info" type="radio" name="labelIcon" checked onchange="selectLabelImg(0)"><label for="info"><img src="./images/info.png" alt=""></label>
+  <input id="star" type="radio" name="labelIcon" onchange="selectLabelImg(1)"><label for="star"><img src="./images/star.png" alt=""></label><br>
+
+  <label for="labelText">文字：</label>
+  <input id="labelText" type="text"><br>
+
+  线段类型：
+  <input id="line" type="radio" name="lineType" checked onchange="selectLineType(0)"><label for="line">实线</label>
+  <input id="dashLine" type="radio" name="lineType" onchange="selectLineType(1)"><label for="dashLine">虚线</label><br>
+  <label for="offset">偏移量：</label><input id="offset" type="range" min="0" max="2" step="0.1" value="0.5"  oninput="offsetChange(this.value)"><span id="offsetValue">0.6</span><br>
+  <label for="color">线段颜色：</label><input id="color" type="color" value="#ffffff" oninput="colorChange(this.value)"><span id="colorValue">#ffffff</span><br>
+  <label for="opacity">线段透明度：</label><input id="opacity" type="range" min="0" max="1" step="0.1" value="0.5" oninput="opacityChange(this.value)"><span id="opacityValue">1</span><br>
+  <label for="width">线段宽度：</label><input id="width" type="range" min="0" max="5" step="1" value="2" oninput="widthChange(this.value)"><span id="widthValue">2</span><br>
+  <button id="create" onclick="createButtonClick()">确定</button>
+  <button id="cancel" onclick="hideFrom()">取消</button>
+</div>
+
+<!--底部操作按钮-->
+<div id="bottomMenu">
+  <button id="mode3D">3D模式</button>
+  <button id="modePano">全景模式</button>
+</div>
+
+<!--引入sdk文件-->
+<script src="../sdkDist/VT.js"></script>
+
+<!--基础配置-->
+<script>
+  // 初始化上下文
+  VT.initContext({divContainer: document.getElementById('app')});
+  // 加载模型文件
+  VT.loadModels({filePath: "https://fire-model.oss-cn-shenzhen.aliyuncs.com/V_VT/changsha/2018-10-17/hicollector/1f676abf2066893786c223cfc7b1dda1"});
+
+  document.getElementById('mode3D').addEventListener('click', function () {
+    // 切换3d模式
+    VT.mode3D();
+  });
+
+  document.getElementById('modePano').addEventListener('click', function () {
+    // 切换全景模式
+    VT.modePano();
+  });
+</script>
+
+<!--标签功能代码-->
+<script>
+
+  var title = document.getElementById('title');
+  var content = document.getElementById('content');
+  var resUrl = document.getElementById('resUrl');
+  var linkUrl = document.getElementById('linkUrl');
+  var offset = document.getElementById('offset');
+  var color = document.getElementById('color');
+  var line = document.getElementById('line');
+  var info = document.getElementById('info');
+  var star = document.getElementById('star');
+  var imgLabel = document.getElementById('imgLabel');
+  var lineType = VT.LINE_TYPE.default;
+  var labelType = VT.LABEL_TYPE.image;
+  var imageSrc = './images/info.png';
+  var labelText = document.getElementById('labelText');
+  var opacity = document.getElementById('opacity');
+  var width = document.getElementById('width');
+
+  // 标签信息数据
+  var labelInfo;
+
+  // 监听偏移量变化
+  function offsetChange(value){
+    document.getElementById('offsetValue').innerText = value;
+  }
+
+  // 监听透明度变化
+  function opacityChange(value){
+    document.getElementById('opacityValue').innerText = value;
+  }
+
+  // 监听宽度变化
+  function widthChange(value){
+    document.getElementById('widthValue').innerText = value;
+  }
+
+  // 选择图标
+  function selectLabelImg(type){
+    switch (type) {
+      case 0:
+        imageSrc = './images/info.png';
+        break;
+      case 1:
+        imageSrc = './images/star.png';
+        break;
+    }
+  }
+
+  // 选择线段类型
+  function selectLineType(type) {
+    switch (type) {
+      case 0:
+        lineType = VT.LINE_TYPE.default;
+        break;
+      case 1:
+        lineType = VT.LINE_TYPE.dash;
+        break;
+    }
+  }
+
+  // 选择标签类型
+  function selectLabelType(type) {
+    switch (type) {
+      case 0:
+        labelType = VT.LABEL_TYPE.image;
+        break;
+      case 1:
+        labelType = VT.LABEL_TYPE.text;
+        break;
+    }
+
+    info.disabled = (type === 1);
+    star.disabled = (type === 1);
+    labelText.disabled = (type === 0);
+  }
+  // 初始化标签类型
+  selectLabelType(0);
+
+  // 选择线段颜色
+  function colorChange(value){
+    document.getElementById('colorValue').innerText = value;
+  }
+
+  // 显示表单
+  function showForm(){
+    resetLabelForm();
+    document.getElementById('labelForm').style.display = 'block';
+  }
+
+  // 隐藏表单
+  function hideFrom(){
+    document.getElementById('labelForm').style.display = 'none';
+  }
+
+  // 确定按钮点击事件
+  function createButtonClick(){
+    createCustomLabel(labelInfo.basicInfo);
+    hideFrom();
+  }
+
+  // 右键点击事件，创建标签
+  document.getElementById('app').addEventListener('contextmenu', function () {
+      // 获取创建标签的基本信息
+      labelInfo = VT.getLabelBasicInfo();
+      if (labelInfo.success) {
+        showForm();
+      } else {
+        console.log(labelInfo.msg)
+      }
+  });
+
+  /**
+   * 创建自定义标签
+   * @param labelBasicInfo
+   */
+  function createCustomLabel(labelBasicInfo) {
+
+    // 新建三维标签
+    var label = VT.createLabel({
+      position: labelBasicInfo.position,
+      normal: labelBasicInfo.normal,
+      floorNo: labelBasicInfo.floorNo,
+      labelType: labelType,
+      labelImg: imageSrc, // 标签图标路径，选填
+      labelText: labelText.value,
+      offset: offset.value,// 图标偏移量，选填
+      lineType: lineType,// 标签线段类型，选填
+      lineColor: color.value,// 标签线段颜色，选填
+      lineAlpha: opacity.value,// 标签线段透明度，选填
+      lineWidth: width.value,// 标签线段宽度，选填
+      title: title.value,// 标签标题，选填
+      content: content.value,// 标签内容，选填
+      resUrl: resUrl.value,// 标签资源路径，选填
+      linkUrl: linkUrl.value,// 标签跳转链接，选填
+    });
+
+    // 设置点击事件
+    label.setClickEvent(function (event) {
+      // 打印标签数据
+      alert(JSON.stringify(event));
+    });
+  }
+
+  // 重置表单内容以及全局变量
+  function resetLabelForm() {
+    title.value = '';
+    content.value = '';
+    resUrl.value = '';
+    linkUrl.value = '';
+    offset.value = 0.5;
+    offsetChange(offset.value);
+    color.value = lineColor = '#ffffff';
+    colorChange(color.value);
+    opacity.value = 0.5;
+    opacityChange(opacity.value);
+    width.value = 2;
+    widthChange(width.value);
+    line.checked = true;
+    lineType = VT.LINE_TYPE.default;
+    info.checked = true;
+    selectLabelImg(0);
+    // 初始化标签类型
+    selectLabelType(0);
+    imgLabel.checked = true;
+    labelText.value='';
+  }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>平面模式</title>
+    <link rel="stylesheet" href="./vt.css">
+</head>
+<body >
+<div style="position: fixed;right:12px;bottom:12px">
+    <button id="mode3D">3D模式</button>
+    <button id="modePano">全景模式</button>
+    <button id="modePlan">平面模式</button>
+</div>
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+    // 切换3d模式
+    document.getElementById('mode3D').addEventListener('click',function(){
+        VT.mode3D();
+    });
+    // 切换全景模式
+    document.getElementById('modePano').addEventListener('click',function(){
+
+        VT.modePano();
+    });
+    // 切换平面模式
+    document.getElementById('modePlan').addEventListener('click',function(){
+
+        VT.modePlan();
+    });
+
+
+</script>
+
+
+</body>
+</html>

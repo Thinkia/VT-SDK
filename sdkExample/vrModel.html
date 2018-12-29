@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>截屏功能</title>
+    <link rel="stylesheet" href="./vt.css">
+  <style>
+
+    /*提示文字*/
+    .tips{
+      position:fixed;
+      left:50%;
+      transform:translate(-50%);
+      top:32px;
+      font-size: 26px;
+      background: white;
+    }
+  </style>
+</head>
+<body >
+
+<div class="tips" id="tips">在移动端开启VR模式，将手机放入眼镜盒子，即可体验VR模式。</div>
+
+
+<div style="position: fixed;right:12px;bottom:12px">
+    <button id="vrModel">VR模式</button>
+</div>
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+    // 移动端VR模式    进入全景才生效
+    document.getElementById('vrModel').addEventListener('click',function(){
+        VT.useVR();
+        if(document.getElementById('vrModel').innerHTML==='VR模式') document.getElementById('vrModel').innerHTML = '退出VR'; else document.getElementById('vrModel').innerHTML = 'VR模式'
+
+    });
+
+
+
+</script>
+
+
+</body>
+</html>

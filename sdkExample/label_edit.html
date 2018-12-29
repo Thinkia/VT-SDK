@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--视口设置：不可缩放，初始缩放为1.0， viewport-fit 为 iphone X 全面屏适配属性-->
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,viewport-fit=cover">
+    <!--避免ie使用兼容模式-->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!--禁止iphone自动识别手机号码-->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <!--360使用极速模式-->
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--防止链接点击后导致当前界面重定向，影响模型显示。-->
+    <base target="_blank">
+    <title>编辑标签</title>
+    <link rel="stylesheet" href="./vt.css">
+    <style>
+        /*标签编辑表单样式*/
+        #labelForm {
+            display: none;
+            line-height: 36px;
+            background: white;
+            padding: 12px;
+            font-size: 16px;
+            position: fixed;
+            left: 0;
+            top: 0;
+        }
+
+        /*底部菜单*/
+        #bottomMenu {
+            position: fixed;
+            right: 12px;
+            bottom: 12px;;
+        }
+
+        /*提示文字*/
+        .tips{
+          position:fixed;
+          left:50%;
+          transform:translate(-50%);
+          top:32px;
+          font-size: 20px;
+          background: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tips">
+  1. 开启右下角 “标签编辑模式” <br>
+  2. 右键点击 <b>模型</b> 任意位置生成标签<br>
+  3. 左键点击 <b>标签</b> 可编辑标签
+</div>
+
+<!--三维渲染容器-->
+<div id="app"></div>
+
+<!--底部操作按钮-->
+<div id="bottomMenu">
+    <button id="mode3D">3D模式</button>
+    <button id="modePano">全景模式</button>
+    <button id="editMode">标签编辑模式<span id="status">(开)</span></button>
+</div>
+
+<!--标签编辑表单-->
+<div id="labelForm">
+    <h2>标签编辑</h2>
+    标题：<input id="title" type="text"><br>
+    内容：<input id="content" type="text"><br>
+    资源路径：<input id="resUrl" type="text" disabled><input id="resFile" type="file"><br>
+    链接地址：<input id="linkUrl" type="text"><br>
+    <button id="editLabelContent">保存修改内容</button><br>
+    <button id="showOrHide">显示/隐藏标签</button><br>
+    <button id="removeLabel">移除标签</button><br>
+    <button id="closeMenu">关闭</button>
+</div>
+
+<script src="../sdkDist/VT.js"></script>
+
+<!--基础配置-->
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer: document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath: "https://fire-model.oss-cn-shenzhen.aliyuncs.com/V_VT/changsha/2018-10-17/hicollector/1f676abf2066893786c223cfc7b1dda1"});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+        // 切换3d模式
+        VT.mode3D();
+    });
+    document.getElementById('modePano').addEventListener('click', function () {
+        // 切换全景模式
+        VT.modePano();
+    });
+</script>
+
+<!--编辑标签-->
+<script>
+
+    // ========================== 变量部分 =============================
+    // 标签表单，用于编辑标签内容和标签状态
+    var labelForm = document.getElementById('labelForm');
+    // 标签标题文本框
+    var title = document.getElementById('title');
+    // 标签内容文本框
+    var content = document.getElementById('content');
+    // 标签资源文本框
+    var resUrl = document.getElementById('resUrl');
+    var resFile = document.getElementById('resFile');
+    // 标签链接文本框
+    var linkUrl = document.getElementById('linkUrl');
+    // 保存标签内容的按钮
+    var btnEditLabelContent = document.getElementById('editLabelContent');
+    // 标签显示/隐藏状态切换按钮
+    var btnShowOrHide = document.getElementById('showOrHide');
+    // 标签显示/隐藏状态切换按钮
+    var btnRemoveLabel = document.getElementById('removeLabel');
+    // 关闭表单按钮
+    var btnCloseMenu = document.getElementById('closeMenu');
+    // 全局的标签对象，指向正在被编辑的标签
+    var editingLabel;
+
+
+    // ==================================== 代码逻辑部分 =========================================
+
+    // 编辑模式开关（启动标签编辑模式，可看到被隐藏的标签）
+    var statusInfo = document.getElementById('status');
+    document.getElementById('editMode').addEventListener('click', function () {
+      VT.labelEditToggle(!VT.labelEditStatus);
+      statusInfo.innerText = VT.labelEditStatus ? '(关)' : '(开)';
+    });
+
+    // 右键点击事件
+    document.getElementById('app').addEventListener('contextmenu', function () {
+
+        // 开启编辑模式后，右键新建标签，左键编辑标签
+        if(VT.labelEditStatus){
+            // 获取创建标签的基本信息
+            var labelInfo = VT.getLabelBasicInfo();
+            if (labelInfo.success) {
+                createCustomLabel(labelInfo.basicInfo);
+            } else {
+                console.log(labelInfo.msg)
+            }
+        }
+
+    });
+
+    // 绑定表单按钮事件
+    bindEvent();
+    function bindEvent() {
+        // 标签的显示和隐藏
+        btnShowOrHide.addEventListener('click', function () {
+            if (editingLabel) {
+                editingLabel.setLabelVisible(!editingLabel.visibleState);
+                alert('显示/隐藏修改成功');
+            }
+        });
+
+        // 移除标签
+        btnRemoveLabel.addEventListener('click', function () {
+            if (editingLabel) {
+                VT.removeLabel(editingLabel);
+                labelForm.style.display = 'none';
+                alert('移除标签成功');
+            }
+        });
+
+        // 修改标签内容
+        btnEditLabelContent.addEventListener('click', function () {
+            if (editingLabel) {
+                editingLabel.setLabelData(
+                    {
+                        title: title.value,
+                        content: content.value,
+                        resUrl: resUrl.value,
+                        linkUrl: linkUrl.value,
+                    }
+                );
+                alert('内容修改成功');
+            }
+        });
+
+        // 关闭标签编辑表单
+        btnCloseMenu.addEventListener('click', function () {
+            labelForm.style.display = 'none';
+        });
+    }
+
+    /**
+     * 创建自定义标签
+     * @param labelBasicInfo
+     */
+    function createCustomLabel(labelBasicInfo){
+
+        // 新建标签时建议隐藏表单
+        labelForm.style.display = 'none';
+
+        // 新建标签
+        var label = VT.createLabel({
+            position: labelBasicInfo.position,
+            normal: labelBasicInfo.normal,
+            floorNo: labelBasicInfo.floorNo,
+            // labelImg,offset,
+            title: labelBasicInfo.title ? labelBasicInfo.title : "标签标题",
+            content: labelBasicInfo.content ? labelBasicInfo.content : "标签描述",
+            resUrl: labelBasicInfo.resUrl ? labelBasicInfo.resUrl : "资源文件路径",
+            linkUrl: labelBasicInfo.linkUrl ? labelBasicInfo.linkUrl : "可跳转链接",
+        });
+
+        // 设置点击事件
+        label.setClickEvent(function (event) {
+
+            // 根据编辑状态执行
+            if (VT.labelEditStatus) {
+
+                // 将被点击的标签设置为被编辑标签
+                editingLabel = label;
+
+                // 初始化表单内容
+                title.value = event.title;
+                content.value = event.content;
+                resUrl.value = event.resUrl;
+                linkUrl.value = event.linkUrl;
+                labelForm.style.display = 'block';
+
+            } else {
+                // 非编辑模式下打印标签内容
+                console.log(event);
+            }
+
+        });
+    }
+
+</script>
+
+<!--加载标签-->
+<script>
+    /**
+     * todo 模拟网络请求
+     */
+    function labelDataRequest(){
+        return [
+            '{"position":{"x":-4.636322859717972,"y":0.1476046182370201,"z":-0.3519711534046728},"normal":{"_x":-1.2235705267216568,"_y":1.5559724580886058,"_z":1.2096663802424983,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第一个标签","content":"内容一","resUrl":"1.jpg","linkUrl":"1.html"}',
+            '{"position":{"x":-2.3047487851158635,"y":-1.739706951501267,"z":-1.1460362489587688},"normal":{"_x":-1.5795402285471563,"_y":0.0016900746049115744,"_z":0.0017049174307567838,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第二个标签","content":"内容二","resUrl":"2.jpg","linkUrl":"2.html"}',
+            '{"position":{"x":0.08623933292191509,"y":-1.7355844995278638,"z":-1.3644085195768785},"normal":{"_x":-1.5827660949606333,"_y":0.001512143967605194,"_z":0.0015303531706887417,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第三个标签","content":"内容三","resUrl":"3.jpg","linkUrl":"3.html"}',
+            '{"position":{"x":1.9298389194617478,"y":-1.7233743466128821,"z":-1.4252659732168622},"normal":{"_x":-1.5667888188784862,"_y":0.010277246512207084,"_z":0.010236143391659175,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第四个标签","content":"内容四","resUrl":"4.jpg","linkUrl":"4.html"}',
+            '{"position":{"x":4.6015436141056,"y":0.08820188692371378,"z":0.15512051816387462},"normal":{"_x":-3.0114249627782255,"_y":-1.554606413290773,"_z":-3.0093064556283617,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第五个标签","content":"内容五","resUrl":"5.jpg","linkUrl":"5.html"}',
+        ]
+    }
+
+
+    var labelDataArray = labelDataRequest();
+    labelDataArray.forEach(function(labelDataStr){
+        createCustomLabel(JSON.parse(labelDataStr));
+    });
+</script>
+</body>
+</html>
