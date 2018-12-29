@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>楼层切换</title>
+  <link rel="stylesheet" href="./vt.css">
+  <style>
+    .floorSelect{
+      position:fixed;
+      background:rgba(0,0,0,.3);
+      width:20%;
+      height:10%;
+      margin-left:40%;
+      display:none;
+    }
+
+    /*提示文字*/
+    .tips{
+      position:fixed;
+      left:50%;
+      transform:translate(-50%);
+      top:32px;
+      font-size: 26px;
+      background: white;
+    }
+
+  </style>
+
+</head>
+<body >
+<div class="tips" id="tips">多楼层模型在3D模式下,点击楼层切换即可弹出楼层选择div。</div>
+
+
+<div style="position: fixed;right:12px;bottom:12px">
+  <button id="mode3D">3D模式</button>
+  <button id="modePano">全景模式</button>
+  <button id="selectFloor">楼层切换</button>
+</div>
+<div id="floorSelect" class="floorSelect"></div>
+
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+  // 初始化上下文
+  VT.initContext({divContainer:document.getElementById('app')});
+  // 加载模型文件
+  VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+  document.getElementById('mode3D').addEventListener('click', function () {
+    // 切换3d模式
+    VT.mode3D();
+  });
+  document.getElementById('modePano').addEventListener('click', function () {
+    // 切换全景模式
+    VT.modePano();
+  });
+  // 测距模式
+  document.getElementById('selectFloor').addEventListener('click',function(){
+    VT.floorSelect();
+    document.getElementById('tips').style.display = 'none';
+ });
+
+
+
+</script>
+
+
+</body>
+</html>

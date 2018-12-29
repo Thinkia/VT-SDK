@@ -1,0 +1,28 @@
+
+/*通用界面样式*/
+html, body {
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  font-size: 0 !important;
+  -webkit-text-size-adjust: none !important;
+}
+
+/*防止 iphone 点击出现的黑色背景*/
+div {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+.vt-container{
+  width: 100% !important;
+  height: 100% !important;
+  background: linear-gradient(#2f2f2f, #444444 16%, #444444);
+}
+
+.vt-container canvas{
+  width: 100% !important;
+  height: 100% !important;
+}
+

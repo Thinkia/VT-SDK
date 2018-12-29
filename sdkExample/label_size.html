@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--视口设置：不可缩放，初始缩放为1.0， viewport-fit 为 iphone X 全面屏适配属性-->
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0,viewport-fit=cover">
+    <!--避免ie使用兼容模式-->
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <!--禁止iphone自动识别手机号码-->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="format-detection" content="email=no">
+    <!--360使用极速模式-->
+    <meta name="renderer" content="webkit">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!--防止链接点击后导致当前界面重定向，影响模型显示。-->
+    <base target="_blank">
+    <title>加载标签</title>
+    <link rel="stylesheet" href="./vt.css">
+    <style>
+        /*底部菜单*/
+        #bottomMenu {
+            position: fixed;
+            right: 12px;
+            bottom: 12px;;
+        }
+
+        #labelForm {
+          position: fixed;
+          left: 32px;
+          top: 32px;
+          font-size: 22px;
+          background: white;
+        }
+
+        /*提示文字*/
+        .tips{
+          position:fixed;
+          left:50%;
+          transform:translate(-50%);
+          top:32px;
+          font-size: 26px;
+          background: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="tips">左侧输入框可设置标签缩放因子，因子越大，标签越小</div>
+
+<!--三维渲染容器-->
+<div id="app"></div>
+
+<div id="labelForm">
+  <label for="scaleFactor">缩放因子：</label><input id="scaleFactor" type="number" value="15"><button onclick="changeFactor()">确定</button>
+</div>
+
+<!--底部操作按钮-->
+<div id="bottomMenu">
+    <button id="mode3D">3D模式</button>
+    <button id="modePano">全景模式</button>
+</div>
+
+<script src="../sdkDist/VT.js"></script>
+
+<!--基础配置-->
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer: document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath: "https://fire-model.oss-cn-shenzhen.aliyuncs.com/V_VT/changsha/2018-10-17/hicollector/1f676abf2066893786c223cfc7b1dda1"});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+        // 切换3d模式
+        VT.mode3D();
+    });
+    document.getElementById('modePano').addEventListener('click', function () {
+        // 切换全景模式
+        VT.modePano();
+    });
+</script>
+
+<!--标签功能代码-->
+<script>
+
+    // ==================================== 代码逻辑部分 =========================================
+
+    // 修改缩放因子的值
+    function changeFactor(){
+      VT.setLabelScaleFactor(document.getElementById('scaleFactor').value);
+    }
+
+
+    /**
+     * todo 模拟网络请求
+     */
+    function labelDataRequest(){
+        return [
+            '{"position":{"x":-4.636322859717972,"y":0.1476046182370201,"z":-0.3519711534046728},"normal":{"_x":-1.2235705267216568,"_y":1.5559724580886058,"_z":1.2096663802424983,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第一个标签","content":"内容一","resUrl":"1.jpg","linkUrl":"1.html"}',
+            '{"position":{"x":-2.3047487851158635,"y":-1.739706951501267,"z":-1.1460362489587688},"normal":{"_x":-1.5795402285471563,"_y":0.0016900746049115744,"_z":0.0017049174307567838,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第二个标签","content":"内容二","resUrl":"2.jpg","linkUrl":"2.html"}',
+            '{"position":{"x":0.08623933292191509,"y":-1.7355844995278638,"z":-1.3644085195768785},"normal":{"_x":-1.5827660949606333,"_y":0.001512143967605194,"_z":0.0015303531706887417,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第三个标签","content":"内容三","resUrl":"3.jpg","linkUrl":"3.html"}',
+            '{"position":{"x":1.9298389194617478,"y":-1.7233743466128821,"z":-1.4252659732168622},"normal":{"_x":-1.5667888188784862,"_y":0.010277246512207084,"_z":0.010236143391659175,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第四个标签","content":"内容四","resUrl":"4.jpg","linkUrl":"4.html"}',
+            '{"position":{"x":4.6015436141056,"y":0.08820188692371378,"z":0.15512051816387462},"normal":{"_x":-3.0114249627782255,"_y":-1.554606413290773,"_z":-3.0093064556283617,"_order":"XYZ"},"floorNo":"floor1","offset":0.6,"title":"第五个标签","content":"内容五","resUrl":"5.jpg","linkUrl":"5.html"}',
+        ]
+    }
+
+
+    var labelDataArray = labelDataRequest();
+    labelDataArray.forEach(function(labelDataStr){
+        createCustomLabel(JSON.parse(labelDataStr));
+    });
+
+    /**
+     * 创建自定义标签
+     * @param labelBasicInfo
+     */
+    function createCustomLabel(labelBasicInfo){
+        var label = VT.createLabel({
+            position: labelBasicInfo.position,
+            normal: labelBasicInfo.normal,
+            floorNo: labelBasicInfo.floorNo,
+            // labelImg,offset,
+            title: labelBasicInfo.title,
+            content: labelBasicInfo.content,
+            resUrl: labelBasicInfo.resUrl,
+            linkUrl: labelBasicInfo.linkUrl,
+        });
+
+        // 设置点击事件
+        label.setClickEvent(function (event) {
+            // 打印标签内容
+            alert(event);
+        });
+    }
+
+
+</script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>测量功能</title>
+    <link rel="stylesheet" href="./vt.css">
+  <style>
+
+    /*提示文字*/
+    .tips{
+      position:fixed;
+      left:50%;
+      transform:translate(-50%);
+      top:32px;
+      font-size: 26px;
+      background: white;
+    }
+  </style>
+
+</head>
+<body >
+
+<div class="tips">点击测距按钮后,鼠标右键点击模型任意两点即可测量距离。</div>
+
+
+<div style="position: fixed;right:12px;bottom:12px">
+  <button id="mode3D">3D模式</button>
+  <button id="modePano">全景模式</button>
+    <button id="distance">测距开启</button>
+</div>
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+      // 切换3d模式
+      VT.mode3D();
+    });
+    document.getElementById('modePano').addEventListener('click', function () {
+      // 切换全景模式
+      VT.modePano();
+    });
+
+    // 测距模式
+    document.getElementById('distance').addEventListener('click',function(){
+        VT.distance({
+        });
+        if(document.getElementById('distance').innerHTML==='测距开启') document.getElementById('distance').innerHTML = '测距关闭'; else document.getElementById('distance').innerHTML = '测距开启'
+    });
+
+    document.addEventListener('contextmenu',function(event){
+        VT.vtDistanceClick(event);
+    })
+
+</script>
+
+
+</body>
+</html>

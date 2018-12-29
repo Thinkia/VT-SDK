@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>户型图与点位图</title>
+    <link rel="stylesheet" href="./vt.css">
+    <style>
+        .svg{
+            position:fixed;
+            background:rgba(0,0,0,0.3);
+            width:20%;
+            height: 30%;
+            display:none;
+        }
+        .point{
+            position:fixed;
+            background:rgba(0,0,0,0.3);
+            width:20%;
+            height: 30%;
+            margin-top:32%;
+            display:none;
+        }
+
+    </style>
+</head>
+<body >
+<div style="position: fixed;right:12px;bottom:12px">
+  <button id="mode3D">3D模式</button>
+  <button id="modePano">全景模式</button>
+    <button id="showSvg">户型图</button>
+    <button id="pointEdit">点位图</button>
+</div>
+<div id="svg" class="svg"></div>
+<div id="point" class="point"></div>
+
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+      // 切换3d模式
+      VT.mode3D();
+    });
+
+    document.getElementById('modePano').addEventListener('click', function () {
+      // 切换全景模式
+      VT.modePano();
+    });
+
+    // 户型图显示
+    document.getElementById('showSvg').addEventListener('click',function(){
+        VT.showSvg({});
+    });
+
+    document.getElementById('pointEdit').addEventListener('click',function(){
+        VT.pointEdit();
+    });
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>截屏功能</title>
+    <link rel="stylesheet" href="./vt.css">
+</head>
+<body >
+<div style="position: fixed;right:12px;bottom:12px">
+  <button id="mode3D">3D模式</button>
+  <button id="modePano">全景模式</button>
+    <button id="screenShot">截屏</button>
+</div>
+<div id="app"></div>
+<script type="text/javascript" src="../sdkDist/VT.js"></script>
+<script>
+    // 初始化上下文
+    VT.initContext({divContainer:document.getElementById('app')});
+    // 加载模型文件
+    VT.loadModels({filePath:'https://cdn1.visualtouring.com/V_VT/changsha/2018-09-15/hicollector/e7a1982d40a1da0bd80439d870196db8'});
+
+    document.getElementById('mode3D').addEventListener('click', function () {
+      // 切换3d模式
+      VT.mode3D();
+    });
+    document.getElementById('modePano').addEventListener('click', function () {
+      // 切换全景模式
+      VT.modePano();
+    });
+
+
+    // 截屏
+    document.getElementById('screenShot').addEventListener('click',function(){
+        VT.screenShot({});
+    });
+
+
+
+</script>
+
+
+</body>
+</html>
